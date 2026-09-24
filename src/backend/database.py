@@ -220,7 +220,7 @@ initial_teachers = [
 
 initial_announcements = [
     {
-        "message": "\U0001F4E2 Activity registration is open until the end of the month. Don't lose your spot!",
+        "message": "Activity registration is open until the end of the month. Don't lose your spot!",
         "start_date": None,
         "expiration_date": (date.today() + timedelta(days=30)).isoformat(),
         "created_by": "principal"
