@@ -570,11 +570,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
+        resetAnnouncementForm();
         showAnnouncementFormMessage(
           isEditing ? "Announcement updated." : "Announcement added.",
           "success"
         );
-        resetAnnouncementForm();
         fetchAllAnnouncements();
         fetchActiveAnnouncements();
       } else {
