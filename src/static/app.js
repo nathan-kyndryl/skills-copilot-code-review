@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentUser = JSON.parse(savedUser);
         updateAuthUI();
         // Verify the stored user with the server
-        validateUserSession(currentUser.username);
+        validateUserSession();
       } catch (error) {
         console.error("Error parsing saved user", error);
         logout(); // Clear invalid data
@@ -151,15 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Validate user session with the server
-  async function validateUserSession(username) {
+  async function validateUserSession() {
     try {
-      const response = await fetch(
-        `/auth/check-session?username=${encodeURIComponent(username)}`
-      );
+      const response = await fetch("/auth/check-session");
 
       if (!response.ok) {
         // Session invalid, log out
-        logout();
+        await logout();
         return;
       }
 
@@ -238,7 +236,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Logout function
-  function logout() {
+  async function logout() {
+    try {
+      await fetch("/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+
     currentUser = null;
     localStorage.removeItem("currentUser");
     updateAuthUI();
@@ -381,11 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
     announcementsListContainer.innerHTML = "<p>Loading announcements...</p>";
 
     try {
-      const response = await fetch(
-        `/announcements?teacher_username=${encodeURIComponent(
-          currentUser.username
-        )}`
-      );
+      const response = await fetch("/announcements");
 
       if (!response.ok) {
         announcementsListContainer.innerHTML =
@@ -464,9 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
       async () => {
         try {
           const response = await fetch(
-            `/announcements/${encodeURIComponent(
-              announcementId
-            )}?teacher_username=${encodeURIComponent(currentUser.username)}`,
+            `/announcements/${encodeURIComponent(announcementId)}`,
             { method: "DELETE" }
           );
 
@@ -553,12 +551,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isEditing = Boolean(announcementId);
     const url = isEditing
-      ? `/announcements/${encodeURIComponent(
-          announcementId
-        )}?teacher_username=${encodeURIComponent(currentUser.username)}`
-      : `/announcements?teacher_username=${encodeURIComponent(
-          currentUser.username
-        )}`;
+      ? `/announcements/${encodeURIComponent(announcementId)}`
+      : "/announcements";
 
     try {
       const response = await fetch(url, {

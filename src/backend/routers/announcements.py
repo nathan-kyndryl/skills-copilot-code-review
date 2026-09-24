@@ -5,11 +5,12 @@ Announcement endpoints for the High School Management System API
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Optional
 
-from ..database import announcements_collection, teachers_collection
+from ..database import announcements_collection
+from .auth import require_teacher_session
 
 router = APIRouter(
     prefix="/announcements",
@@ -21,18 +22,6 @@ class AnnouncementInput(BaseModel):
     message: str = Field(..., min_length=1, max_length=500)
     start_date: Optional[str] = None
     expiration_date: str
-
-
-def _require_teacher(teacher_username: Optional[str]) -> None:
-    """Raise if the given username does not belong to a signed-in teacher."""
-    if not teacher_username:
-        raise HTTPException(
-            status_code=401, detail="Authentication required for this action")
-
-    if not teachers_collection.find_one({"_id": teacher_username}):
-        raise HTTPException(
-            status_code=401, detail="Invalid teacher credentials")
-
 
 def _validate_dates(start_date: Optional[str], expiration_date: str) -> None:
     """Validate the date fields and ensure expiration is after start."""
@@ -75,9 +64,9 @@ def get_active_announcements() -> List[Dict[str, Any]]:
 
 @router.get("", response_model=List[Dict[str, Any]])
 @router.get("/", response_model=List[Dict[str, Any]])
-def get_all_announcements(teacher_username: Optional[str] = Query(None)) -> List[Dict[str, Any]]:
+def get_all_announcements(request: Request) -> List[Dict[str, Any]]:
     """Get all announcements regardless of status - requires teacher authentication"""
-    _require_teacher(teacher_username)
+    require_teacher_session(request)
 
     announcements = announcements_collection.find().sort("expiration_date", 1)
     return [_serialize(a) for a in announcements]
@@ -87,10 +76,10 @@ def get_all_announcements(teacher_username: Optional[str] = Query(None)) -> List
 @router.post("/", response_model=Dict[str, Any])
 def create_announcement(
     announcement: AnnouncementInput,
-    teacher_username: Optional[str] = Query(None)
+    request: Request
 ) -> Dict[str, Any]:
     """Create a new announcement - requires teacher authentication"""
-    _require_teacher(teacher_username)
+    teacher = require_teacher_session(request)
     _validate_dates(announcement.start_date, announcement.expiration_date)
 
     new_announcement = {
@@ -98,7 +87,7 @@ def create_announcement(
         "message": announcement.message,
         "start_date": announcement.start_date,
         "expiration_date": announcement.expiration_date,
-        "created_by": teacher_username
+        "created_by": teacher["username"]
     }
     announcements_collection.insert_one(new_announcement)
 
@@ -109,10 +98,10 @@ def create_announcement(
 def update_announcement(
     announcement_id: str,
     announcement: AnnouncementInput,
-    teacher_username: Optional[str] = Query(None)
+    request: Request
 ) -> Dict[str, Any]:
     """Update an existing announcement - requires teacher authentication"""
-    _require_teacher(teacher_username)
+    require_teacher_session(request)
     _validate_dates(announcement.start_date, announcement.expiration_date)
 
     existing = announcements_collection.find_one({"_id": announcement_id})
@@ -133,10 +122,10 @@ def update_announcement(
 @router.delete("/{announcement_id}")
 def delete_announcement(
     announcement_id: str,
-    teacher_username: Optional[str] = Query(None)
+    request: Request
 ) -> Dict[str, str]:
     """Delete an announcement - requires teacher authentication"""
-    _require_teacher(teacher_username)
+    require_teacher_session(request)
 
     result = announcements_collection.delete_one({"_id": announcement_id})
     if result.deleted_count == 0:
