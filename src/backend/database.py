@@ -14,6 +14,7 @@ db = client['mergington_high']
 activities_collection = db['activities']
 teachers_collection = db['teachers']
 announcements_collection = db['announcements']
+teacher_sessions_collection = db['teacher_sessions']
 
 # Methods
 
@@ -42,6 +43,7 @@ def verify_password(hashed_password: str, plain_password: str) -> bool:
 
 def init_database():
     """Initialize database if empty"""
+    teacher_sessions_collection.create_index("expires_at", expireAfterSeconds=0)
 
     # Initialize activities if empty
     if activities_collection.count_documents({}) == 0:
