@@ -666,9 +666,162 @@ footer {
 }
 
 .announcement-banner {
-  background-color: #4caf50;
+  background-color: var(--success);
   color: white;
   text-align: center;
-  padding: 15px;
-  font-weight: bold;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-item {
+  padding: 12px 20px;
+}
+
+.announcement-item + .announcement-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Manage announcements button */
+#manage-announcements-button {
+  margin-right: 8px;
+}
+
+.announcement-icon {
+  font-size: 1rem;
+}
+
+/* Announcements management modal */
+.announcements-modal-content {
+  max-width: 520px;
+  text-align: left;
+}
+
+#announcement-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+#announcement-form textarea:focus,
+#announcement-form input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(83, 75, 174, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.announcement-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#announcement-submit-button {
+  background-color: var(--primary);
+  color: white;
+}
+
+#announcement-cancel-edit {
+  background-color: var(--border);
+  color: var(--text-primary);
+}
+
+.announcements-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
+
+#announcements-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.announcement-list-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background-color: var(--background);
+}
+
+.announcement-list-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.announcement-list-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.announcement-list-item-actions button {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.edit-announcement-btn {
+  background-color: var(--primary-light);
+  color: white;
+}
+
+.delete-announcement-btn {
+  background-color: var(--error);
+  color: white;
+}
+
+.announcement-list-item-message {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.announcement-list-item-dates {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.announcement-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 9px;
+  border-radius: 10px;
+}
+
+.status-active {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+.status-upcoming {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-expired {
+  background-color: var(--border-light);
+  color: var(--text-secondary);
 }

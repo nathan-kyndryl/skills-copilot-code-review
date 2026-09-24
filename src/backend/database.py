@@ -2,6 +2,9 @@
 MongoDB database configuration and setup for Mergington High School API
 """
 
+import uuid
+from datetime import date, timedelta
+
 from pymongo import MongoClient
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
 
@@ -10,6 +13,8 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['mergington_high']
 activities_collection = db['activities']
 teachers_collection = db['teachers']
+announcements_collection = db['announcements']
+teacher_sessions_collection = db['teacher_sessions']
 
 # Methods
 
@@ -38,6 +43,7 @@ def verify_password(hashed_password: str, plain_password: str) -> bool:
 
 def init_database():
     """Initialize database if empty"""
+    teacher_sessions_collection.create_index("expires_at", expireAfterSeconds=0)
 
     # Initialize activities if empty
     if activities_collection.count_documents({}) == 0:
@@ -49,6 +55,12 @@ def init_database():
         for teacher in initial_teachers:
             teachers_collection.insert_one(
                 {"_id": teacher["username"], **teacher})
+
+    # Initialize announcements if empty
+    if announcements_collection.count_documents({}) == 0:
+        for announcement in initial_announcements:
+            announcements_collection.insert_one(
+                {"_id": str(uuid.uuid4()), **announcement})
 
 
 # Initial database if empty
@@ -205,5 +217,14 @@ initial_teachers = [
         "display_name": "Principal Martinez",
         "password": hash_password("admin789"),
         "role": "admin"
+    }
+]
+
+initial_announcements = [
+    {
+        "message": "Activity registration is open until the end of the month. Don't lose your spot!",
+        "start_date": None,
+        "expiration_date": (date.today() + timedelta(days=30)).isoformat(),
+        "created_by": "principal"
     }
 ]
